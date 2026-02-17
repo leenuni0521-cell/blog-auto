@@ -7,71 +7,264 @@ from datetime import datetime
 st.set_page_config(
     page_title="AI 콘텐츠 생성기",
     page_icon="✍️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# CSS 스타일
+# CSS 스타일 (다크 네이비 테마)
 st.markdown("""
 <style>
+    /* 전체 배경 */
+    .stApp {
+        background: #0f1419;
+    }
+    
+    /* 사이드바 배경 */
+    [data-testid="stSidebar"] {
+        background: #1a1f2e;
+    }
+    
     /* placeholder 글씨 밝게 */
     ::placeholder {
-        color: #adb5bd !important;
+        color: #6b7280 !important;
         opacity: 1 !important;
     }
     
-    [data-theme="dark"] ::placeholder {
-        color: #ced4da !important;
+    /* 입력 필드 스타일 */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background: #1e2433 !important;
+        border: 1px solid #2d3748 !important;
+        border-radius: 8px !important;
+        color: #e2e8f0 !important;
+        padding: 0.75rem !important;
     }
     
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 1px #667eea !important;
+    }
+    
+    /* 메인 헤더 */
     .main-header {
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
+    .header-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
     .sub-header {
-        color: #666;
+        color: #9ca3af;
         margin-bottom: 2rem;
+        font-size: 0.9rem;
     }
+    
+    /* 섹션 타이틀 */
+    .section-title {
+        color: #667eea;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* 메뉴 스타일 */
+    .menu-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+    }
+    
+    .menu-button {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1rem;
+        margin-bottom: 0.5rem;
+        background: #1e2433;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #9ca3af;
+        font-weight: 500;
+    }
+    
+    .menu-button:hover {
+        border-color: #667eea;
+        background: #252d3d;
+        color: #e2e8f0;
+    }
+    
+    .menu-button.active {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .menu-button-icon {
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+    
+    /* 플랫폼 버튼 그리드 */
+    .platform-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .platform-btn {
+        background: #1e2433;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 0.75rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+    
+    .platform-btn:hover {
+        border-color: #667eea;
+        color: #e2e8f0;
+    }
+    
+    .platform-btn.active {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+    
+    /* 글자수 버튼 */
+    .word-count-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .word-count-btn {
+        background: #1e2433;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 0.625rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+    
+    .word-count-btn:hover {
+        border-color: #667eea;
+        color: #e2e8f0;
+    }
+    
+    .word-count-btn.active {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+        font-weight: 600;
+    }
+    
+    /* 메인 생성 버튼 */
     .stButton>button {
         width: 100%;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
-        font-size: 1.1rem;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
         font-weight: 600;
         border-radius: 8px;
         transition: all 0.3s;
     }
+    
     .stButton>button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
+    
+    /* 결과 박스 */
     .output-box {
-        background: #f8f9fa;
+        background: #1e2433;
+        border: 1px solid #2d3748;
         border-radius: 12px;
         padding: 1.5rem;
-        border: 1px solid #e9ecef;
-        min-height: 400px;
+        min-height: 500px;
+        color: #e2e8f0;
     }
+    
+    .output-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #6b7280;
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+    
+    .output-placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    /* 스타일 태그 */
     .style-tag {
         display: inline-block;
-        background: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         margin: 0.25rem;
+        font-weight: 500;
     }
     
-    /* 라디오 버튼 왼쪽 정렬 */
-    .stRadio > div {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start !important;
+    /* 체크박스 스타일 */
+    .stCheckbox {
+        color: #e2e8f0;
+    }
+    
+    /* 슬라이더 */
+    .stSlider > div > div > div {
+        background: #2d3748;
+    }
+    
+    /* 라디오 버튼 숨기기 */
+    .stRadio {
+        display: none;
+    }
+    
+    /* 구분선 */
+    hr {
+        border-color: #2d3748;
+        margin: 1.5rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -89,9 +282,7 @@ client = get_anthropic_client()
 
 # 말투 분석 함수
 def analyze_writing_style(sample_text):
-    """샘플 글에서 말투 특징 추출"""
     features = []
-    
     if "~해요" in sample_text or "~이에요" in sample_text:
         features.append("해요체")
     if "~더라구요" in sample_text or "~거든요" in sample_text:
@@ -100,53 +291,39 @@ def analyze_writing_style(sample_text):
         features.append("이모지 활용")
     if "안녕하세요" in sample_text or "오늘은" in sample_text:
         features.append("친근한 인사")
-    if "[이미지:" in sample_text or "사진 설명" in sample_text:
-        features.append("이미지 자리 표시")
-    
-    return features if features else ["일반적인 블로그 스타일"]
+    return features if features else ["일반 스타일"]
 
 # 글 생성 함수
 def generate_content(topic, platform, tone, word_count, style_sample, use_emoji, use_hashtags, use_image_placeholders):
-    """Claude API로 콘텐츠 생성"""
-    
-    # 플랫폼별 설정
     platform_configs = {
-        "네이버 블로그": {"max_length": 2500, "format": "긴 형식, 단락 구분 명확"},
-        "쓰레드": {"max_length": 800, "format": "짧은 문장, 번호 매기기"},
-        "X(트위터)": {"max_length": 280, "format": "280자 이내, 임팩트 있게"},
-        "인스타그램": {"max_length": 1500, "format": "줄바꿈 많이, 해시태그 충분히"},
-        "유튜브 스크립트": {"max_length": 2500, "format": "말하는 듯한 구어체"},
-        "뉴스레터": {"max_length": 2000, "format": "전문적이고 정보 전달 중심"}
+        "블로그": {"format": "긴 형식, 단락 구분 명확"},
+        "쓰레드": {"format": "짧은 문장, 번호 매기기"},
+        "X": {"format": "280자 이내, 임팩트"},
+        "인스타": {"format": "줄바꿈 많이, 해시태그"},
+        "유튜브": {"format": "말하는 듯한 구어체"},
+        "뉴스레터": {"format": "전문적, 정보 전달"}
     }
     
-    config = platform_configs.get(platform, platform_configs["네이버 블로그"])
+    config = platform_configs.get(platform, platform_configs["블로그"])
     
-    # 말투 분석
     style_instructions = ""
     if style_sample:
         features = analyze_writing_style(style_sample)
-        style_instructions = f"\n\n<말투 학습>\n다음 특징을 반영해주세요: {', '.join(features)}\n\n샘플 글:\n{style_sample[:500]}\n</말투 학습>"
+        style_instructions = f"\n\n말투 특징: {', '.join(features)}\n샘플: {style_sample[:300]}"
     
-    # 프롬프트 구성
-    system_prompt = f"""당신은 {platform} 콘텐츠 전문 작가입니다.
+    system_prompt = f"""당신은 {platform} 콘텐츠 작가입니다.
 
-<작성 규칙>
 - 플랫폼: {platform}
 - 형식: {config['format']}
-- 목표 글자수: 약 {word_count}자
-- 말투: {'친근하고 편안한 말투' if tone < 50 else '전문적이고 신뢰감 있는 말투'}
-- 이모지: {'자연스럽게 사용' if use_emoji else '사용하지 않음'}
-- 해시태그: {'마지막에 관련 해시태그 5-10개 추가' if use_hashtags else '사용하지 않음'}
-- 이미지 자리: {'[이미지: 설명] 형태로 적절한 위치에 표시' if use_image_placeholders else '표시하지 않음'}
-</작성 규칙>
+- 글자수: {word_count}자
+- 말투: {'친근함' if tone < 50 else '전문성'}
+- 이모지: {'사용' if use_emoji else '미사용'}
+- 해시태그: {'추가' if use_hashtags else '미사용'}
+- 이미지: {'[이미지: 설명] 표시' if use_image_placeholders else '미사용'}
+{style_instructions}"""
 
-{style_instructions}
-
-주제에 대해 검색된 최신 정보를 바탕으로 정확하고 유익한 콘텐츠를 작성하세요."""
-
-    user_prompt = f"주제: {topic}\n\n위 주제에 대해 {platform} 포스팅을 작성해주세요."
+    user_prompt = f"주제: {topic}\n\n위 주제로 {platform} 포스팅 작성해주세요."
     
-    # 진행 상황 표시
     try:
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
@@ -155,140 +332,170 @@ def generate_content(topic, platform, tone, word_count, style_sample, use_emoji,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}]
         )
-        
-        content = response.content[0].text
-        return content
-        
+        return response.content[0].text
     except Exception as e:
-        return f"❌ 생성 중 오류 발생: {str(e)}"
+        return f"❌ 오류: {str(e)}"
 
-# 세션 스테이트 초기화
+# 세션 스테이트
 if "mode" not in st.session_state:
     st.session_state.mode = "글쓰기"
 if "generated_content" not in st.session_state:
     st.session_state.generated_content = ""
+if "platform" not in st.session_state:
+    st.session_state.platform = "블로그"
+if "word_count" not in st.session_state:
+    st.session_state.word_count = 800
 
-# 사이드바 - 메뉴
+# 사이드바 메뉴
 with st.sidebar:
-    st.markdown("# 📌 메뉴")
-    mode = st.radio(
-        "모드 선택",
-        ["✍️ 글쓰기", "🎨 그림그리기"],
-        label_visibility="collapsed"
-    )
-    st.session_state.mode = mode
+    st.markdown('<div class="menu-title">MENU</div>', unsafe_allow_html=True)
+    
+    # 글쓰기 버튼
+    writing_active = "active" if st.session_state.mode == "글쓰기" else ""
+    if st.button("글쓰기_btn", key="writing_hidden", label_visibility="collapsed"):
+        st.session_state.mode = "글쓰기"
+    
+    st.markdown(f"""
+    <div class="menu-button {writing_active}" onclick="document.querySelector('[key=writing_hidden]').click()" style="cursor: pointer;">
+        <span class="menu-button-icon">✍️</span>
+        <span>글쓰기</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 그림그리기 버튼
+    image_active = "active" if st.session_state.mode == "그림그리기" else ""
+    if st.button("그림_btn", key="image_hidden", label_visibility="collapsed"):
+        st.session_state.mode = "그림그리기"
+    
+    st.markdown(f"""
+    <div class="menu-button {image_active}" onclick="document.querySelector('[key=image_hidden]').click()" style="cursor: pointer;">
+        <span class="menu-button-icon">🎨</span>
+        <span>그림그리기</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 # 메인 레이아웃
-if "글쓰기" in st.session_state.mode:
-    st.markdown('<h1 class="main-header">✍️ AI 콘텐츠 생성기</h1>', unsafe_allow_html=True)
+if st.session_state.mode == "글쓰기":
+    # 헤더
+    st.markdown('''
+    <div class="main-header">
+        ✍️ AI 콘텐츠 생성기
+        <span class="header-badge">✨ 글 공유 + 말투 학습</span>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">내 말투 학습 + 웹 검색 기반 자동 작성</p>', unsafe_allow_html=True)
     
     # 2단 레이아웃
     left_col, right_col = st.columns([1, 1])
     
     with left_col:
-        st.markdown("### 🔍 주제 입력")
+        # 주제 입력
+        st.markdown('<div class="section-title">🔍 주제 입력</div>', unsafe_allow_html=True)
         topic = st.text_input(
             "주제",
-            placeholder="예: 다이소 보조배터리 사용 후기, 배당주 투자 전략, ChatGPT 활용법",
+            placeholder="예: 다이소 무선 랜카드, 배당주 투자 전략, ChatGPT 활용법",
             label_visibility="collapsed"
         )
         
-        st.markdown("---")
+        st.markdown("<hr>", unsafe_allow_html=True)
         
         # 말투 학습
-        st.markdown("### 📝 말투 학습")
+        st.markdown('<div class="section-title">📝 말투 학습</div>', unsafe_allow_html=True)
         style_sample = st.text_area(
-            "샘플 글",
-            height=120,
+            "샘플",
+            height=100,
             placeholder="내가 쓴 글을 붙여넣으세요...\n\n예: 안녕하세요! 오늘은 미국 주식에 대해 이야기해볼게요. 솔직히 처음엔 어려웠는데 하나씩 배우다 보니 재미있더라구요 😊",
             label_visibility="collapsed"
         )
         
         if style_sample:
             features = analyze_writing_style(style_sample)
-            st.markdown("**🎯 감지된 스타일:**")
             for feature in features:
                 st.markdown(f'<span class="style-tag">{feature}</span>', unsafe_allow_html=True)
         
-        st.markdown("---")
+        st.markdown("<hr>", unsafe_allow_html=True)
         
-        # 플랫폼 선택
-        st.markdown("### 📱 플랫폼")
-        platform = st.radio(
-            "플랫폼",
-            ["네이버 블로그", "쓰레드", "X(트위터)", "인스타그램", "유튜브 스크립트", "뉴스레터"],
-            label_visibility="collapsed"
-        )
+        # 플랫폼
+        st.markdown('<div class="section-title">📱 플랫폼</div>', unsafe_allow_html=True)
         
-        st.markdown("---")
+        platforms = ["블로그", "쓰레드", "X", "인스타", "유튜브", "뉴스레터"]
+        cols = st.columns(3)
+        for idx, platform in enumerate(platforms):
+            col_idx = idx % 3
+            with cols[col_idx]:
+                if st.button(platform, key=f"platform_{platform}", use_container_width=True):
+                    st.session_state.platform = platform
+        
+        st.markdown("<hr>", unsafe_allow_html=True)
         
         # 말투 조절
-        st.markdown("### 💬 말투")
-        tone = st.slider("말투", 0, 100, 30, label_visibility="collapsed")
+        st.markdown('<div class="section-title">💬 말투 조절</div>', unsafe_allow_html=True)
+        tone = st.slider("tone", 0, 100, 30, label_visibility="collapsed")
         col1, col2 = st.columns(2)
         col1.markdown("😊 친근함")
         col2.markdown("👔 전문성")
         
-        st.markdown("---")
+        st.markdown("<hr>", unsafe_allow_html=True)
         
         # 글자수
-        st.markdown("### 📏 글자수")
-        word_count = st.select_slider(
-            "글자수",
-            options=[300, 500, 800, 1200, 1500, 2000, 2500],
-            value=800,
-            label_visibility="collapsed"
-        )
+        st.markdown('<div class="section-title">📏 글자수</div>', unsafe_allow_html=True)
         
-        st.markdown("---")
+        word_counts = [300, 800, 1500, 2500]
+        cols = st.columns(4)
+        for idx, wc in enumerate(word_counts):
+            with cols[idx]:
+                if st.button(str(wc), key=f"wc_{wc}", use_container_width=True):
+                    st.session_state.word_count = wc
+        
+        st.markdown("<hr>", unsafe_allow_html=True)
         
         # 옵션
-        st.markdown("### 🎨 추가 옵션")
+        st.markdown('<div class="section-title">🎨 옵션</div>', unsafe_allow_html=True)
         use_emoji = st.checkbox("이모지 사용", value=True)
-        use_hashtags = st.checkbox("해시태그 추가", value=True)
+        use_hashtags = st.checkbox("해시태그 자동 생성", value=True)
         use_image_placeholders = st.checkbox("이미지 자리 표시", value=True)
         
-        st.markdown("---")
+        st.markdown("<hr>", unsafe_allow_html=True)
         
         # 생성 버튼
-        if st.button("✨ 콘텐츠 생성하기", type="primary", use_container_width=True):
+        if st.button("✨ 콘텐츠 생성하기", type="primary"):
             if not topic:
                 st.warning("⚠️ 주제를 입력해주세요!")
             else:
-                with st.spinner("🔍 주제 분석 중..."):
+                with st.spinner("🔍 생성 중..."):
                     content = generate_content(
-                        topic, platform, tone, word_count,
-                        style_sample,
-                        use_emoji, use_hashtags, use_image_placeholders
+                        topic, st.session_state.platform, tone, st.session_state.word_count,
+                        style_sample, use_emoji, use_hashtags, use_image_placeholders
                     )
                     st.session_state.generated_content = content
     
     with right_col:
-        st.markdown("### 📄 생성 결과")
+        st.markdown('<div class="section-title">📄 생성된 콘텐츠</div>', unsafe_allow_html=True)
         
         if st.session_state.generated_content:
             st.markdown('<div class="output-box">', unsafe_allow_html=True)
             st.markdown(st.session_state.generated_content)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # 다운로드 버튼
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"콘텐츠_{timestamp}.txt"
-            
             st.download_button(
-                "💾 TXT 다운로드",
+                "💾 복사하기",
                 st.session_state.generated_content,
-                filename,
-                mime="text/plain",
+                f"content_{timestamp}.txt",
                 use_container_width=True
             )
         else:
-            st.markdown('<div class="output-box">', unsafe_allow_html=True)
-            st.info("👈 왼쪽에서 주제를 입력하고 생성 버튼을 눌러주세요!")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('''
+            <div class="output-box">
+                <div class="output-placeholder">
+                    <div class="output-placeholder-icon">✨</div>
+                    <div>왼쪽 상단에서 주제를 입력하고</div>
+                    <div>콘텐츠 생성하기를 눌러주세요!</div>
+                    <div style="margin-top: 1rem; font-size: 0.875rem;">내 스타일로 글이 완성돼요</div>
+                </div>
+            </div>
+            ''', unsafe_allow_html=True)
 
-else:  # 그림그리기 모드
+else:  # 그림그리기
     st.markdown('<h1 class="main-header">🎨 AI 이미지 생성</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">준비 중입니다...</p>', unsafe_allow_html=True)
-    st.info("💡 OpenAI API 결제 문제가 해결되면 다시 추가할 예정이에요!")
+    st.info("💡 준비 중입니다...")
