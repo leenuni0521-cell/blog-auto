@@ -24,6 +24,25 @@ st.markdown("""
         background: #1a1f2e;
     }
     
+    /* 사이드바 버튼 커스텀 */
+    [data-testid="stSidebar"] .stButton>button {
+        background: #1e2433 !important;
+        border: 1px solid #2d3748 !important;
+        color: #9ca3af !important;
+        font-weight: 500 !important;
+        padding: 0.875rem 1rem !important;
+        border-radius: 8px !important;
+        transition: all 0.3s !important;
+        text-align: left !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton>button:hover {
+        border-color: #667eea !important;
+        background: #252d3d !important;
+        color: #e2e8f0 !important;
+        transform: translateX(4px) !important;
+    }
+    
     /* placeholder 글씨 밝게 */
     ::placeholder {
         color: #6b7280 !important;
@@ -95,116 +114,22 @@ st.markdown("""
         padding-left: 0.5rem;
     }
     
-    .menu-button {
-        display: flex;
-        align-items: center;
-        padding: 0.875rem 1rem;
-        margin-bottom: 0.5rem;
-        background: #1e2433;
-        border: 1px solid #2d3748;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        color: #9ca3af;
-        font-weight: 500;
-    }
-    
-    .menu-button:hover {
-        border-color: #667eea;
-        background: #252d3d;
-        color: #e2e8f0;
-    }
-    
-    .menu-button.active {
-        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-        color: #667eea;
-        border-color: #667eea;
-    }
-    
-    .menu-button-icon {
-        font-size: 1.25rem;
-        margin-right: 0.75rem;
-    }
-    
-    /* 플랫폼 버튼 그리드 */
-    .platform-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .platform-btn {
-        background: #1e2433;
-        border: 1px solid #2d3748;
-        border-radius: 8px;
-        padding: 0.75rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        color: #9ca3af;
-        font-size: 0.875rem;
-    }
-    
-    .platform-btn:hover {
-        border-color: #667eea;
-        color: #e2e8f0;
-    }
-    
-    .platform-btn.active {
-        background: #667eea;
-        border-color: #667eea;
-        color: white;
-    }
-    
-    /* 글자수 버튼 */
-    .word-count-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .word-count-btn {
-        background: #1e2433;
-        border: 1px solid #2d3748;
-        border-radius: 8px;
-        padding: 0.625rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        color: #9ca3af;
-        font-size: 0.875rem;
-    }
-    
-    .word-count-btn:hover {
-        border-color: #667eea;
-        color: #e2e8f0;
-    }
-    
-    .word-count-btn.active {
-        background: #667eea;
-        border-color: #667eea;
-        color: white;
-        font-weight: 600;
-    }
-    
-    /* 메인 생성 버튼 */
-    .stButton>button {
+    /* 메인 콘텐츠 영역 버튼 (생성하기 등) */
+    .stButton>button:not([data-testid="stSidebar"] .stButton>button) {
         width: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 0.875rem 1.5rem;
-        font-size: 1rem;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: all 0.3s;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.875rem 1.5rem !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        transition: all 0.3s !important;
     }
     
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    .stButton>button:not([data-testid="stSidebar"] .stButton>button):hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
     }
     
     /* 결과 박스 */
@@ -254,11 +179,6 @@ st.markdown("""
     /* 슬라이더 */
     .stSlider > div > div > div {
         background: #2d3748;
-    }
-    
-    /* 라디오 버튼 숨기기 */
-    .stRadio {
-        display: none;
     }
     
     /* 구분선 */
@@ -351,28 +271,12 @@ with st.sidebar:
     st.markdown('<div class="menu-title">MENU</div>', unsafe_allow_html=True)
     
     # 글쓰기 버튼
-    writing_active = "active" if st.session_state.mode == "글쓰기" else ""
-    if st.button("글쓰기_btn", key="writing_hidden", label_visibility="collapsed"):
+    if st.button("✍️ 글쓰기", key="writing_menu", use_container_width=True):
         st.session_state.mode = "글쓰기"
     
-    st.markdown(f"""
-    <div class="menu-button {writing_active}" onclick="document.querySelector('[key=writing_hidden]').click()" style="cursor: pointer;">
-        <span class="menu-button-icon">✍️</span>
-        <span>글쓰기</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
     # 그림그리기 버튼
-    image_active = "active" if st.session_state.mode == "그림그리기" else ""
-    if st.button("그림_btn", key="image_hidden", label_visibility="collapsed"):
+    if st.button("🎨 그림그리기", key="image_menu", use_container_width=True):
         st.session_state.mode = "그림그리기"
-    
-    st.markdown(f"""
-    <div class="menu-button {image_active}" onclick="document.querySelector('[key=image_hidden]').click()" style="cursor: pointer;">
-        <span class="menu-button-icon">🎨</span>
-        <span>그림그리기</span>
-    </div>
-    """, unsafe_allow_html=True)
 
 # 메인 레이아웃
 if st.session_state.mode == "글쓰기":
@@ -458,7 +362,7 @@ if st.session_state.mode == "글쓰기":
         st.markdown("<hr>", unsafe_allow_html=True)
         
         # 생성 버튼
-        if st.button("✨ 콘텐츠 생성하기", type="primary"):
+        if st.button("✨ 콘텐츠 생성하기", type="primary", key="generate_btn"):
             if not topic:
                 st.warning("⚠️ 주제를 입력해주세요!")
             else:
@@ -482,7 +386,8 @@ if st.session_state.mode == "글쓰기":
                 "💾 복사하기",
                 st.session_state.generated_content,
                 f"content_{timestamp}.txt",
-                use_container_width=True
+                use_container_width=True,
+                key="download_btn"
             )
         else:
             st.markdown('''
