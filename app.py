@@ -35,6 +35,11 @@ st.markdown("""
         max-width: 100% !important;
     }
     
+    /* 컬럼 간격 제거 */
+    [data-testid="column"] {
+        padding: 0 !important;
+    }
+    
     /* 커스텀 헤더 */
     .custom-header {
         padding: 16px 28px;
@@ -55,20 +60,12 @@ st.markdown("""
         border-radius: 99px;
     }
     
-    /* 레이아웃 */
-    .layout-container {
-        display: flex;
-        height: calc(100vh - 60px);
-    }
-    
     /* 왼쪽 패널 */
     .left-panel {
-        width: 420px;
-        min-width: 420px;
+        min-height: calc(100vh - 60px);
         padding: 20px;
         border-right: 1px solid #2a2a42;
         background: #13131f;
-        overflow-y: auto;
     }
     
     /* 섹션 라벨 */
@@ -84,11 +81,11 @@ st.markdown("""
     
     /* 말투 학습 카드 */
     .style-card {
-        background: rgba(108,99,255,0.07);
-        border: 1.5px solid rgba(108,99,255,0.25);
+        background: rgba(108,99,255,0.10);
+        border: 2px solid rgba(108,99,255,0.35);
         border-radius: 12px;
         padding: 14px;
-        margin-bottom: 18px;
+        margin-bottom: 8px;
     }
     .style-card-header {
         display: flex;
@@ -99,7 +96,7 @@ st.markdown("""
     .style-card-title {
         font-size: 0.88rem;
         font-weight: 600;
-        color: #6c63ff;
+        color: #7c73ff;
     }
     .style-status {
         font-size: 0.7rem;
@@ -108,6 +105,11 @@ st.markdown("""
         background: rgba(74,222,128,0.15);
         color: #4ade80;
         border: 1px solid rgba(74,222,128,0.3);
+    }
+    .style-status.learning {
+        background: rgba(108,99,255,0.15);
+        color: #7c73ff;
+        border-color: rgba(108,99,255,0.4);
     }
     
     /* 입력 필드 */
@@ -118,7 +120,8 @@ st.markdown("""
         border-radius: 10px !important;
         color: #e8e8f8 !important;
         padding: 13px 16px !important;
-        font-size: 0.92rem !important;
+        font-size: 0.88rem !important;
+        line-height: 1.7 !important;
     }
     
     .stTextInput > div > div > input:focus,
@@ -129,8 +132,8 @@ st.markdown("""
     
     .stTextInput > div > div > input::placeholder,
     .stTextArea > div > div > textarea::placeholder {
-        color: #6666aa !important;
-        font-size: 0.82rem !important;
+        color: #5555aa !important;
+        font-size: 0.78rem !important;
     }
     
     /* 주제 입력 배지 */
@@ -153,22 +156,39 @@ st.markdown("""
     }
     
     /* 플랫폼 버튼 */
-    div[data-testid="column"] button {
+    div[data-testid="column"] button[kind="secondary"] {
         background: #1a1a2e !important;
         border: 1.5px solid #2a2a42 !important;
-        color: #e8e8f8 !important;
+        color: #9ca3af !important;
         padding: 11px 8px !important;
         border-radius: 10px !important;
         font-size: 0.71rem !important;
+        font-weight: 500 !important;
         min-height: 85px !important;
         white-space: pre-line !important;
         line-height: 1.6 !important;
+        transition: all 0.2s !important;
     }
     
-    div[data-testid="column"] button:hover {
+    div[data-testid="column"] button[kind="secondary"]:hover {
         border-color: #6c63ff !important;
         background: #1e1e2e !important;
         transform: translateY(-2px) !important;
+    }
+    
+    /* 분석하기 버튼 */
+    button[key="analyze_btn"] {
+        background: rgba(108,99,255,0.15) !important;
+        border: 1.5px solid rgba(108,99,255,0.4) !important;
+        color: #7c73ff !important;
+        font-weight: 600 !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+        font-size: 0.8rem !important;
+    }
+    
+    button[key="analyze_btn"]:hover {
+        background: rgba(108,99,255,0.25) !important;
     }
     
     /* 슬라이더 */
@@ -212,9 +232,8 @@ st.markdown("""
     
     /* 오른쪽 패널 */
     .right-panel {
-        flex: 1;
+        min-height: calc(100vh - 60px);
         padding: 22px;
-        overflow-y: auto;
         background: #0c0c14;
     }
     
@@ -259,31 +278,8 @@ st.markdown("""
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
         font-size: 0.7rem;
-        margin: 0.25rem;
+        margin: 0.25rem 0.25rem 0.25rem 0;
         font-weight: 500;
-    }
-    
-    /* 진행 상황 */
-    .search-progress {
-        background: #13131f;
-        border: 1px solid #2a2a42;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 14px;
-    }
-    
-    .progress-step {
-        padding: 6px 0;
-        font-size: 0.82rem;
-        color: #6666aa;
-    }
-    
-    .progress-step.done {
-        color: #4ade80;
-    }
-    
-    .progress-step.current {
-        color: #e8e8f8;
     }
     
     /* 통계 */
@@ -328,22 +324,6 @@ st.markdown("""
     .search-sources span {
         color: #4ade80;
         font-weight: 600;
-    }
-    
-    /* 복사 버튼 */
-    .copy-btn {
-        background: #1a1a2e;
-        border: 1px solid #2a2a42;
-        color: #e8e8f8;
-        padding: 7px 14px;
-        border-radius: 8px;
-        font-size: 0.78rem;
-        cursor: pointer;
-    }
-    
-    .copy-btn:hover {
-        border-color: #6c63ff;
-        color: #6c63ff;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -439,8 +419,8 @@ st.markdown('''
 </div>
 ''', unsafe_allow_html=True)
 
-# 레이아웃
-col1, col2 = st.columns([420, 1000], gap="small")
+# 레이아웃 (gap 수정!)
+col1, col2 = st.columns([1, 2.5], gap="small")
 
 # 왼쪽 패널
 with col1:
@@ -448,11 +428,15 @@ with col1:
     
     # 말투 학습
     st.markdown('<div class="section-label">✦ 말투 학습</div>', unsafe_allow_html=True)
-    st.markdown('''
+    
+    status_class = "" if st.session_state.style_learned else "learning"
+    status_text = "✓ 학습 완료" if st.session_state.style_learned else "학습 대기중"
+    
+    st.markdown(f'''
     <div class="style-card">
         <div class="style-card-header">
             <div class="style-card-title">내 글 샘플 붙여넣기</div>
-            <div class="style-status">''' + ('✓ 학습 완료' if st.session_state.style_learned else '학습 대기중') + '''</div>
+            <div class="style-status {status_class}">{status_text}</div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
