@@ -491,7 +491,7 @@ with col1:
                 st.session_state.platform = platform
     
     # 말투 조절
-    st.markdown('<div class="section-label">🎙️ 말투 조절</div>', unsafe_allow_html=True)
+
     tone = st.slider("tone", 0, 100, 40, label_visibility="collapsed", key="tone_slider")
     col_t1, col_t2 = st.columns(2)
     col_t1.markdown('<span style="font-size: 0.75rem; color: #6666aa;">친근함</span>', unsafe_allow_html=True)
