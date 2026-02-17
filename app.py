@@ -440,7 +440,7 @@ st.markdown('''
 ''', unsafe_allow_html=True)
 
 # 레이아웃
-col1, col2 = st.columns([420, 1000], gap="none")
+col1, col2 = st.columns([420, 1000], gap="small")
 
 # 왼쪽 패널
 with col1:
