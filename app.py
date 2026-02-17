@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# CSS 스타일 (개선됨!)
+# CSS 스타일
 st.markdown("""
 <style>
     /* placeholder 글씨 밝게 */
@@ -19,7 +19,6 @@ st.markdown("""
         opacity: 1 !important;
     }
     
-    /* 다크모드 placeholder */
     [data-theme="dark"] ::placeholder {
         color: #ced4da !important;
     }
@@ -27,14 +26,12 @@ st.markdown("""
     .main-header {
         font-size: 2.5rem;
         font-weight: 700;
-        text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
     .sub-header {
-        text-align: center;
         color: #666;
         margin-bottom: 2rem;
     }
@@ -57,8 +54,8 @@ st.markdown("""
         background: #f8f9fa;
         border-radius: 12px;
         padding: 1.5rem;
-        margin-top: 1rem;
         border: 1px solid #e9ecef;
+        min-height: 400px;
     }
     .style-tag {
         display: inline-block;
@@ -75,16 +72,6 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         align-items: flex-start !important;
-    }
-    
-    .stRadio > div > label {
-        width: 100%;
-        text-align: left !important;
-    }
-    
-    /* 사이드바 간격 */
-    .sidebar .element-container {
-        margin-bottom: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -160,119 +147,148 @@ def generate_content(topic, platform, tone, word_count, style_sample, use_emoji,
     user_prompt = f"주제: {topic}\n\n위 주제에 대해 {platform} 포스팅을 작성해주세요."
     
     # 진행 상황 표시
-    with st.spinner("🔍 주제 분석 중..."):
-        try:
-            response = client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=4096,
-                temperature=0.7,
-                system=system_prompt,
-                messages=[{"role": "user", "content": user_prompt}]
-            )
-            
-            content = response.content[0].text
-            return content
-            
-        except Exception as e:
-            st.error(f"❌ 생성 중 오류 발생: {str(e)}")
-            return None
-
-# 메인 UI
-st.markdown('<h1 class="main-header">✍️ 콘텐츠 생성</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">내 말투 학습 + 웹 검색 기반 자동 작성</p>', unsafe_allow_html=True)
-
-# 사이드바 설정
-with st.sidebar:
-    st.markdown("### 📝 말투 학습")
-    
-    style_sample = st.text_area(
-        "내가 쓴 글을 붙여넣으면 말투를 학습해요",
-        height=150,
-        placeholder="내가 쓴 글을 여기에 붙여넣으세요...\n\n예: 안녕하세요! 오늘은 미국 주식에 대해 이야기해볼게요. 솔직히 처음엔 어려웠는데 하나씩 배우다 보니 재미있더라구요 😊",
-        key="style_sample"
-    )
-    
-    if style_sample:
-        features = analyze_writing_style(style_sample)
-        st.markdown("**🎯 감지된 스타일:**")
-        for feature in features:
-            st.markdown(f'<span class="style-tag">{feature}</span>', unsafe_allow_html=True)
-    
-    st.markdown("---")
-    st.markdown("### 📱 플랫폼")
-    
-    # 라디오 버튼으로 변경 (왼쪽 정렬)
-    platform = st.radio(
-        "플랫폼 선택",
-        ["네이버 블로그", "쓰레드", "X(트위터)", "인스타그램", "유튜브 스크립트", "뉴스레터"],
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("---")
-    st.markdown("### 💬 말투")
-    tone = st.slider(
-        "말투 조절",
-        0, 100, 30,
-        label_visibility="collapsed"
-    )
-    col1, col2 = st.columns(2)
-    col1.markdown("😊 친근함")
-    col2.markdown("👔 전문성")
-    
-    st.markdown("---")
-    st.markdown("### 📏 글자수")
-    word_count = st.select_slider(
-        "글자수 선택",
-        options=[300, 500, 800, 1200, 1500, 2000, 2500],
-        value=800,
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("---")
-    st.markdown("### 🎨 추가 옵션")
-    use_emoji = st.checkbox("이모지 사용", value=True)
-    use_hashtags = st.checkbox("해시태그 추가", value=True)
-    use_image_placeholders = st.checkbox("이미지 자리 표시", value=True)
-
-# 메인 영역
-st.markdown("### 🔍 주제 입력")
-topic = st.text_input(
-    "주제를 입력하세요",
-    placeholder="예: 다이소 보조배터리 사용 후기, 배당주 투자 전략, ChatGPT 활용법",
-    label_visibility="collapsed"
-)
-
-st.markdown("---")
-
-# 생성 버튼
-if st.button("✨ 콘텐츠 생성하기", type="primary", use_container_width=True):
-    if not topic:
-        st.warning("⚠️ 주제를 입력해주세요!")
-    else:
-        content = generate_content(
-            topic, platform, tone, word_count,
-            style_sample,
-            use_emoji, use_hashtags, use_image_placeholders
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=4096,
+            temperature=0.7,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}]
         )
         
-        if content:
-            st.success("✅ 생성 완료!")
-            
-            # 결과 표시
+        content = response.content[0].text
+        return content
+        
+    except Exception as e:
+        return f"❌ 생성 중 오류 발생: {str(e)}"
+
+# 세션 스테이트 초기화
+if "mode" not in st.session_state:
+    st.session_state.mode = "글쓰기"
+if "generated_content" not in st.session_state:
+    st.session_state.generated_content = ""
+
+# 사이드바 - 메뉴
+with st.sidebar:
+    st.markdown("# 📌 메뉴")
+    mode = st.radio(
+        "모드 선택",
+        ["✍️ 글쓰기", "🎨 그림그리기"],
+        label_visibility="collapsed"
+    )
+    st.session_state.mode = mode
+
+# 메인 레이아웃
+if "글쓰기" in st.session_state.mode:
+    st.markdown('<h1 class="main-header">✍️ AI 콘텐츠 생성기</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">내 말투 학습 + 웹 검색 기반 자동 작성</p>', unsafe_allow_html=True)
+    
+    # 2단 레이아웃
+    left_col, right_col = st.columns([1, 1])
+    
+    with left_col:
+        st.markdown("### 🔍 주제 입력")
+        topic = st.text_input(
+            "주제",
+            placeholder="예: 다이소 보조배터리 사용 후기, 배당주 투자 전략, ChatGPT 활용법",
+            label_visibility="collapsed"
+        )
+        
+        st.markdown("---")
+        
+        # 말투 학습
+        st.markdown("### 📝 말투 학습")
+        style_sample = st.text_area(
+            "샘플 글",
+            height=120,
+            placeholder="내가 쓴 글을 붙여넣으세요...\n\n예: 안녕하세요! 오늘은 미국 주식에 대해 이야기해볼게요. 솔직히 처음엔 어려웠는데 하나씩 배우다 보니 재미있더라구요 😊",
+            label_visibility="collapsed"
+        )
+        
+        if style_sample:
+            features = analyze_writing_style(style_sample)
+            st.markdown("**🎯 감지된 스타일:**")
+            for feature in features:
+                st.markdown(f'<span class="style-tag">{feature}</span>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # 플랫폼 선택
+        st.markdown("### 📱 플랫폼")
+        platform = st.radio(
+            "플랫폼",
+            ["네이버 블로그", "쓰레드", "X(트위터)", "인스타그램", "유튜브 스크립트", "뉴스레터"],
+            label_visibility="collapsed"
+        )
+        
+        st.markdown("---")
+        
+        # 말투 조절
+        st.markdown("### 💬 말투")
+        tone = st.slider("말투", 0, 100, 30, label_visibility="collapsed")
+        col1, col2 = st.columns(2)
+        col1.markdown("😊 친근함")
+        col2.markdown("👔 전문성")
+        
+        st.markdown("---")
+        
+        # 글자수
+        st.markdown("### 📏 글자수")
+        word_count = st.select_slider(
+            "글자수",
+            options=[300, 500, 800, 1200, 1500, 2000, 2500],
+            value=800,
+            label_visibility="collapsed"
+        )
+        
+        st.markdown("---")
+        
+        # 옵션
+        st.markdown("### 🎨 추가 옵션")
+        use_emoji = st.checkbox("이모지 사용", value=True)
+        use_hashtags = st.checkbox("해시태그 추가", value=True)
+        use_image_placeholders = st.checkbox("이미지 자리 표시", value=True)
+        
+        st.markdown("---")
+        
+        # 생성 버튼
+        if st.button("✨ 콘텐츠 생성하기", type="primary", use_container_width=True):
+            if not topic:
+                st.warning("⚠️ 주제를 입력해주세요!")
+            else:
+                with st.spinner("🔍 주제 분석 중..."):
+                    content = generate_content(
+                        topic, platform, tone, word_count,
+                        style_sample,
+                        use_emoji, use_hashtags, use_image_placeholders
+                    )
+                    st.session_state.generated_content = content
+    
+    with right_col:
+        st.markdown("### 📄 생성 결과")
+        
+        if st.session_state.generated_content:
             st.markdown('<div class="output-box">', unsafe_allow_html=True)
-            st.markdown(content)
+            st.markdown(st.session_state.generated_content)
             st.markdown('</div>', unsafe_allow_html=True)
             
             # 다운로드 버튼
-            col1, col2 = st.columns(2)
-            
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{platform}_{topic[:10]}_{timestamp}.txt"
+            filename = f"콘텐츠_{timestamp}.txt"
             
-            col1.download_button(
+            st.download_button(
                 "💾 TXT 다운로드",
-                content,
+                st.session_state.generated_content,
                 filename,
                 mime="text/plain",
                 use_container_width=True
             )
+        else:
+            st.markdown('<div class="output-box">', unsafe_allow_html=True)
+            st.info("👈 왼쪽에서 주제를 입력하고 생성 버튼을 눌러주세요!")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+else:  # 그림그리기 모드
+    st.markdown('<h1 class="main-header">🎨 AI 이미지 생성</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">준비 중입니다...</p>', unsafe_allow_html=True)
+    st.info("💡 OpenAI API 결제 문제가 해결되면 다시 추가할 예정이에요!")
