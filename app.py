@@ -199,11 +199,14 @@ col1, col2 = st.columns([1, 2.5])
 
 with col1:
     st.markdown('<span class="sec-label">✦ 말투 학습</span>', unsafe_allow_html=True)
-    style = st.text_area("샘플", placeholder="내 글 샘플 붙여넣기", height=100, label_visibility="collapsed")
+    style = st.text_area("샘플", placeholder="내 글 샘플 붙여넣기", height=80, label_visibility="collapsed")
     
     st.divider()
     st.markdown('<span class="sec-label">🔍 주제</span>', unsafe_allow_html=True)
     topic = st.text_input("주제", placeholder="예: 다이소 무선 랜카드", label_visibility="collapsed")
+    
+    st.markdown('<span class="sec-label">📝 추가 요청사항</span>', unsafe_allow_html=True)
+    custom_req = st.text_area("요청", placeholder="예: 가격 정보 강조, 초보자용으로, 비교 분석 포함 등", height=60, label_visibility="collapsed")
     
     st.divider()
     st.markdown('<span class="sec-label">📱 플랫폼</span>', unsafe_allow_html=True)
@@ -226,6 +229,7 @@ with col1:
     with c1:
         emoji = st.checkbox("이모지", True)
         tag = st.checkbox("해시태그", True)
+        use_search = st.checkbox("웹 검색", True)
     with c2:
         img = st.checkbox("이미지", True)
         nxt = st.checkbox("다음편", False)
@@ -244,58 +248,75 @@ with col2:
             if not api:
                 st.error("API 키를 확인해주세요!")
             else:
-                client = anthropic.Anthropic(api_key=api)
-                plat_map = {"📝 블로그":"블로그","🧵 쓰레드":"쓰레드","✖ X":"X","📸 인스타":"인스타","🎬 유튜브":"유튜브","✉️ 뉴스레터":"뉴스레터"}
-                tone_map = {0:"친근",25:"캐주얼",50:"균형",75:"전문",100:"격식"}
-                
-                opts = []
-                if emoji: opts.append("이모지")
-                if tag: opts.append("해시태그")
-                if img: opts.append("이미지")
-                if nxt: opts.append("예고")
-                
-                sys = f"""블로그 작성.
+                try:
+                    client = anthropic.Anthropic(api_key=api)
+                    plat_map = {"📝 블로그":"블로그","🧵 쓰레드":"쓰레드","✖ X":"X","📸 인스타":"인스타","🎬 유튜브":"유튜브","✉️ 뉴스레터":"뉴스레터"}
+                    tone_map = {0:"친근",25:"캐주얼",50:"균형",75:"전문",100:"격식"}
+                    
+                    opts = []
+                    if emoji: opts.append("이모지")
+                    if tag: opts.append("해시태그")
+                    if img: opts.append("이미지")
+                    if nxt: opts.append("예고")
+                    
+                    sys = f"""블로그 작성.
 규칙: 플랫폼={plat_map[plat]}, 말투={tone_map[tone]}, {wc}자, 옵션={','.join(opts)}
 {"말투샘플:"+style[:800] if style and len(style)>50 else ""}
-웹검색으로 최신정보."""
+{"추가요청:"+custom_req if custom_req else ""}
+{"웹검색으로 최신정보 반영." if use_search else "바로 작성."}"""
+                    
+                    qs = []
+                    res = ""
+                    
+                    with st.status("작성 중...", expanded=True) as st_:
+                        if use_search:
+                            st.write("🔍 검색...")
+                            r = client.messages.create(
+                                model="claude-sonnet-4-5-20250929",
+                                max_tokens=4096,
+                                system=sys,
+                                tools=[{"type":"web_search_20250305","name":"web_search"}],
+                                messages=[{"role":"user","content":f'"{topic}" 콘텐츠 작성'}]
+                            )
+                            
+                            for b in r.content:
+                                if b.type=="tool_use" and b.name=="web_search":
+                                    q = b.input.get("query","")
+                                    qs.append(q)
+                                    st.write(f"🔎 {q}")
+                            
+                            st.write("✍️ 작성...")
+                            for b in r.content:
+                                if hasattr(b,"text"):
+                                    res += b.text
+                            
+                            if r.stop_reason=="tool_use":
+                                m = [
+                                    {"role":"user","content":f'"{topic}" 콘텐츠 작성'},
+                                    {"role":"assistant","content":r.content},
+                                    {"role":"user","content":[{"type":"tool_result","tool_use_id":b.id,"content":"완료"} for b in r.content if b.type=="tool_use"]}
+                                ]
+                                r2 = client.messages.create(model="claude-sonnet-4-5-20250929",max_tokens=4096,system=sys,messages=m)
+                                res = "".join(b.text for b in r2.content if hasattr(b,"text"))
+                        else:
+                            st.write("✍️ 바로 작성...")
+                            r = client.messages.create(
+                                model="claude-sonnet-4-5-20250929",
+                                max_tokens=4096,
+                                system=sys,
+                                messages=[{"role":"user","content":f'"{topic}" 콘텐츠 작성'}]
+                            )
+                            res = "".join(b.text for b in r.content if hasattr(b,"text"))
+                        
+                        st_.update(label="✅ 완료!", state="complete")
+                    
+                    st.session_state["res"] = res.strip()
+                    st.session_state["qs"] = qs
                 
-                qs = []
-                res = ""
-                
-                with st.status("작성 중...", expanded=True) as st_:
-                    st.write("🔍 검색...")
-                    r = client.messages.create(
-                        model="claude-sonnet-4-5-20250929",
-                        max_tokens=4096,
-                        system=sys,
-                        tools=[{"type":"web_search_20250305","name":"web_search"}],
-                        messages=[{"role":"user","content":f'"{topic}" 콘텐츠 웹검색 후 작성'}]
-                    )
-                    
-                    for b in r.content:
-                        if b.type=="tool_use" and b.name=="web_search":
-                            q = b.input.get("query","")
-                            qs.append(q)
-                            st.write(f"🔎 {q}")
-                    
-                    st.write("✍️ 작성...")
-                    for b in r.content:
-                        if hasattr(b,"text"):
-                            res += b.text
-                    
-                    if r.stop_reason=="tool_use":
-                        m = [
-                            {"role":"user","content":f'"{topic}" 콘텐츠 웹검색 후 작성'},
-                            {"role":"assistant","content":r.content},
-                            {"role":"user","content":[{"type":"tool_result","tool_use_id":b.id,"content":"완료"} for b in r.content if b.type=="tool_use"]}
-                        ]
-                        r2 = client.messages.create(model="claude-sonnet-4-5-20250929",max_tokens=4096,system=sys,messages=m)
-                        res = "".join(b.text for b in r2.content if hasattr(b,"text"))
-                    
-                    st_.update(label="✅ 완료!", state="complete")
-                
-                st.session_state["res"] = res.strip()
-                st.session_state["qs"] = qs
+                except anthropic.RateLimitError:
+                    st.error("⏰ API 사용량 한도 초과! 잠시 후 다시 시도하거나 크레딧을 충전해주세요.")
+                except Exception as e:
+                    st.error(f"오류: {str(e)}")
     
     if "res" in st.session_state:
         res = st.session_state["res"]
