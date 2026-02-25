@@ -6,6 +6,10 @@ from datetime import datetime
 
 st.set_page_config(page_title="AI 콘텐츠 생성기", page_icon="✦", layout="wide")
 
+# 전역 변수
+PLAT_MAP = {"📝 블로그":"블로그","🧵 쓰레드":"쓰레드","✖ X":"X","📸 인스타":"인스타","🎬 유튜브":"유튜브","✉️ 뉴스레터":"뉴스레터"}
+TONE_MAP = {0:"친근",25:"캐주얼",50:"균형",75:"전문",100:"격식"}
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
@@ -250,8 +254,6 @@ with col2:
             else:
                 try:
                     client = anthropic.Anthropic(api_key=api)
-                    plat_map = {"📝 블로그":"블로그","🧵 쓰레드":"쓰레드","✖ X":"X","📸 인스타":"인스타","🎬 유튜브":"유튜브","✉️ 뉴스레터":"뉴스레터"}
-                    tone_map = {0:"친근",25:"캐주얼",50:"균형",75:"전문",100:"격식"}
                     
                     opts = []
                     if emoji: opts.append("이모지")
@@ -260,7 +262,7 @@ with col2:
                     if nxt: opts.append("예고")
                     
                     sys = f"""블로그 작성.
-규칙: 플랫폼={plat_map[plat]}, 말투={tone_map[tone]}, {wc}자, 옵션={','.join(opts)}
+규칙: 플랫폼={PLAT_MAP[plat]}, 말투={TONE_MAP[tone]}, {wc}자, 옵션={','.join(opts)}
 {"말투샘플:"+style[:800] if style and len(style)>50 else ""}
 {"추가요청:"+custom_req if custom_req else ""}
 {"웹검색으로 최신정보 반영." if use_search else "바로 작성."}"""
@@ -312,6 +314,7 @@ with col2:
                     
                     st.session_state["res"] = res.strip()
                     st.session_state["qs"] = qs
+                    st.session_state["plat"] = plat
                 
                 except anthropic.RateLimitError:
                     st.error("⏰ API 사용량 한도 초과! 잠시 후 다시 시도하거나 크레딧을 충전해주세요.")
@@ -321,6 +324,7 @@ with col2:
     if "res" in st.session_state:
         res = st.session_state["res"]
         qs = st.session_state.get("qs",[])
+        saved_plat = st.session_state.get("plat","📝 블로그")
         
         if qs:
             st.info(f"✦ 검색: {', '.join(qs)}")
@@ -331,7 +335,7 @@ with col2:
         with c1:
             st.markdown(f'<div class="stat-box"><div class="stat-num">{len(res):,}</div><div class="stat-label">글자수</div></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown(f'<div class="stat-box"><div class="stat-num">{plat_map.get(plat,"블로그")}</div><div class="stat-label">플랫폼</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="stat-box"><div class="stat-num">{PLAT_MAP.get(saved_plat,"블로그")}</div><div class="stat-label">플랫폼</div></div>', unsafe_allow_html=True)
         with c3:
             st.markdown(f'<div class="stat-box"><div class="stat-num">{"학습" if style else "기본"}</div><div class="stat-label">말투</div></div>', unsafe_allow_html=True)
         
