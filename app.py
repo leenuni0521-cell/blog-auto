@@ -16,12 +16,10 @@ st.markdown("""
     --border: #2a2a42; --accent: #6c63ff; --text: #e8e8f8; --muted: #6666aa;
 }
 
-/* 전체 배경 */
 [data-testid="stAppViewContainer"] { background: var(--bg) !important; }
 [data-testid="stHeader"] { display: none !important; }
 .main .block-container { padding: 0 !important; max-width: 100% !important; }
 
-/* 헤더 */
 .custom-header {
     padding: 14px 24px;
     border-bottom: 1px solid var(--border);
@@ -41,27 +39,6 @@ st.markdown("""
     border-radius: 99px;
 }
 
-/* 레이아웃 */
-.layout-wrapper {
-    display: flex;
-    height: calc(100vh - 50px);
-}
-.left-panel {
-    width: 340px;
-    min-width: 340px;
-    max-width: 340px;
-    padding: 18px;
-    border-right: 1px solid var(--border);
-    background: var(--surface);
-    overflow-y: auto;
-}
-.right-panel {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-/* 섹션 */
 .sec-label {
     font-size: 0.68rem;
     font-weight: 700;
@@ -73,7 +50,6 @@ st.markdown("""
 }
 .sec-label:first-child { margin-top: 0; }
 
-/* 입력 */
 .stTextArea textarea, .stTextInput input {
     background: var(--surface2) !important;
     border: 1.5px solid var(--border) !important;
@@ -85,7 +61,6 @@ st.markdown("""
     border-color: var(--accent) !important;
 }
 
-/* 라디오 버튼 (플랫폼 선택) */
 .stRadio > div {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
@@ -115,7 +90,6 @@ st.markdown("""
     font-weight: 500 !important;
 }
 
-/* 슬라이더 */
 .stSlider > div > div > div {
     background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 100%) !important;
 }
@@ -125,12 +99,6 @@ st.markdown("""
     box-shadow: 0 0 0 2px rgba(108,99,255,0.3) !important;
 }
 
-/* Select Slider */
-.stSlider [data-baseweb="slider"] {
-    margin-top: 8px !important;
-}
-
-/* 체크박스 */
 .stCheckbox {
     margin: 6px 0 !important;
 }
@@ -148,7 +116,6 @@ st.markdown("""
     border-color: var(--accent) !important;
 }
 
-/* 생성 버튼 */
 .stButton > button {
     background: linear-gradient(135deg, #6c63ff, #9c63ff) !important;
     color: white !important;
@@ -166,7 +133,6 @@ st.markdown("""
     box-shadow: 0 6px 16px rgba(108,99,255,0.4) !important;
 }
 
-/* 결과 카드 */
 .result-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -179,7 +145,6 @@ st.markdown("""
     margin-bottom: 12px;
 }
 
-/* 통계 */
 .stat-box {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -198,16 +163,13 @@ st.markdown("""
     margin-top: 2px;
 }
 
-/* Divider */
 .stDivider {
     border-color: var(--border) !important;
     margin: 10px 0 !important;
 }
 
-/* 텍스트 */
 h1,h2,h3,p,div,label,span { color: var(--text) !important; }
 
-/* 스크롤바 */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -226,7 +188,6 @@ def get_api_key():
     except:
         return None
 
-# 헤더
 st.markdown("""
 <div class="custom-header">
     <div class="logo"><span>AI</span> 콘텐츠 생성기</div>
@@ -234,12 +195,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 레이아웃
-col1, col2 = st.columns([340, 1000], gap="none")
+col1, col2 = st.columns([1, 2.5])
 
 with col1:
-    st.markdown('<div class="left-panel">', unsafe_allow_html=True)
-    
     st.markdown('<span class="sec-label">✦ 말투 학습</span>', unsafe_allow_html=True)
     style = st.text_area("샘플", placeholder="내 글 샘플 붙여넣기", height=100, label_visibility="collapsed")
     
@@ -274,11 +232,8 @@ with col1:
     
     st.divider()
     gen = st.button("✦ 생성하기", use_container_width=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="right-panel">', unsafe_allow_html=True)
     st.markdown('<span class="sec-label">생성된 콘텐츠</span>', unsafe_allow_html=True)
     
     if gen:
@@ -375,5 +330,3 @@ with col2:
             </div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
