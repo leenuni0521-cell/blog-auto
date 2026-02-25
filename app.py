@@ -261,11 +261,32 @@ with col2:
                     if img: opts.append("이미지")
                     if nxt: opts.append("예고")
                     
-                    sys = f"""블로그 작성.
-규칙: 플랫폼={PLAT_MAP[plat]}, 말투={TONE_MAP[tone]}, {wc}자, 옵션={','.join(opts)}
-{"말투샘플:"+style[:800] if style and len(style)>50 else ""}
-{"추가요청:"+custom_req if custom_req else ""}
-{"웹검색으로 최신정보 반영." if use_search else "바로 작성."}"""
+                    style_instruction = ""
+                    if style and len(style) > 50:
+                        style_instruction = f"""
+## 말투 스타일 참고 (내용 복사 금지!)
+아래는 블로거의 글 샘플입니다. **말투, 어미, 문장 구조, 전개 방식만** 참고하세요.
+샘플의 실제 내용이나 주제는 절대 복사하지 말고, 새로운 주제에 맞는 내용을 작성하세요.
+
+샘플:
+{style[:600]}
+
+주의: 위 샘플은 스타일 참고용일 뿐입니다. 내용을 복사하지 말고, "{topic}"에 대한 새로운 내용을 작성하세요.
+"""
+                    
+                    sys = f"""블로그 콘텐츠 작성 전문가입니다.
+{style_instruction}
+
+작성 규칙:
+- 플랫폼: {PLAT_MAP[plat]}
+- 말투: {TONE_MAP[tone]}
+- 목표 글자수: {wc}자
+- 옵션: {','.join(opts)}
+{"- 추가 요청: "+custom_req if custom_req else ""}
+
+{"웹 검색으로 최신 정보를 찾아 정확한 내용을 작성하세요." if use_search else "주어진 주제에 대해 바로 작성하세요."}
+
+중요: 말투 샘플이 제공된 경우, 그 글의 말투와 문체만 따라하되, 내용은 "{topic}"에 대한 새로운 내용이어야 합니다."""
                     
                     qs = []
                     res = ""
